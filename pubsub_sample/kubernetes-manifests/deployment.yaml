@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pubsub-deployment
+spec:
+  selector:
+    matchLabels:
+      app: pubsub
+  template:
+    metadata:
+      labels:
+        app: pubsub
+    spec:
+      serviceAccountName: pubsub
+      containers:
+      - name: pubsub
+        image: asia-east1-docker.pkg.dev/shawnho-demo-2023/shawnho-demo-2023/pubsub-java
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8088

@@ -1,0 +1,97 @@
+buildscript {
+  dependencies {
+    classpath('com.google.cloud.tools:jib-native-image-extension-gradle:0.1.0')
+  }
+}
+plugins {
+	id 'java'
+    id 'application'
+    id 'com.google.cloud.tools.jib' version '3.4.0'
+    
+	//id 'org.springframework.boot' version '3.2.0'
+	//id 'io.spring.dependency-management' version '1.1.4'
+	id 'org.graalvm.buildtools.native' version '0.9.28'
+}
+group = 'momo.demo'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+repositories {
+	mavenCentral()
+    google()
+}
+
+ext {
+	set('springCloudGcpVersion', "5.0.0")
+	set('springCloudVersion', "2023.0.0")
+}
+
+configurations {
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+    }
+}
+dependencies {
+	//implementation 'org.springframework.boot:spring-boot-starter-web'
+    //implementation 'org.springframework.integration:spring-integration-core'
+    implementation platform('com.google.cloud:libraries-bom:26.29.0')
+    implementation 'com.google.cloud:google-cloud-pubsub'
+	//testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation platform('com.google.cloud:spring-cloud-gcp-dependencies:3.7.4')
+    //implementation platform('org.springframework.boot:spring-boot-dependencies:2.7.18')
+}
+application {
+    mainClass = 'momo.demo.pubsub_sample.PubsubSampleApplication'
+}
+// dependencyManagement {
+// 	imports {
+// 		mavenBom "com.google.cloud:spring-cloud-gcp-dependencies:${springCloudGcpVersion}"
+// 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+// 	}
+// }
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+graalvmNative {
+    binaries {
+        main {
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(17)
+                vendor = JvmVendorSpec.matching("GraalVM Community")
+            }
+        }
+    }
+}
+tasks.withType(Jar) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+jib {
+    from {
+        image = 'gcr.io/distroless/java17-debian12' //You may leave it empty to use a default image
+    }
+    to {
+        image = 'asia-east1-docker.pkg.dev/shawnho-demo-2023/shawnho-demo-2023/pubsub-jib' //By default Jib pushes images into Docker Hub
+        tags = ['0.1', 'latest']
+    }
+    container {
+        jvmFlags = ['-Xms128m'] //You may pass additional flags
+        ports = ['8080'] //Open ports
+        format = 'OCI' //Even choose a foramt of the image you are building
+    }
+    pluginExtensions {
+        pluginExtension {
+            implementation = 'com.google.cloud.tools.jib.gradle.extension.nativeimage.JibNativeImageExtension'
+            properties = [
+                imageName: 'pubsub_sample'   
+            ]
+        }
+    }
+}

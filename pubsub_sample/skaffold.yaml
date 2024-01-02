@@ -1,0 +1,19 @@
+apiVersion: skaffold/v4beta8
+kind: Config
+metadata:
+  name: pubsub-sample
+build:
+  artifacts:
+    - image: asia-east1-docker.pkg.dev/shawnho-demo-2023/shawnho-demo-2023/pubsub-java
+      context: .
+      jib: {}
+manifests:
+  rawYaml:
+    - kubernetes-manifests/service-account.yaml
+    - kubernetes-manifests/deployment.yaml
+    - kubernetes-manifests/service.yaml
+# optional profile to run the jib build on Google Cloud Build
+profiles:
+  - name: gcb
+    build:
+      googleCloudBuild: {}

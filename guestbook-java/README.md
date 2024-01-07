@@ -88,15 +88,16 @@ kubectl patch services bindplane -n bindplane -p '{"spec":{"type":"LoadBalancer"
 ```
 
 * 設定Bindplane Agent於Ubuntu上
-等到LoadBalancer的IP位置產生後，即可登入，我們先進入Configuration Tab，並選擇使用Linux Agent (提供較多的Source可供使用)的方式，我們選擇OpenTelemetry與Prometheus的兩種Sources，並對應設定Google Cloud以及Google Managed Prometheus兩個Exporters。
+等到LoadBalancer的IP位置產生後，即可登入，我們先進入Configuration Tab，並選擇使用Linux Agent (提供較多的Source可供使用)的方式，我們選擇OpenTelemetry與Prometheus的兩種Sources，並對應設定Google Cloud以及Google Managed Prometheus兩個Exporters，如下圖。
+![Configuration Tab](images/configuration.png]
 
 之後再進入Agent頁面，我們就可以產生Install Agent的腳本(如下方範例）：
 ```
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/download/v1.41.0/install_unix.sh)" install_unix.sh -e ws://bindplane.bindplane.svc.cluster.local:3001/v1/opamp -s 13c15d7c-233e-49e3-bef4-f7498f33518f -v 1.41.0 -k configuration=prometheus,install_id=e8a20a64-5356-4447-abed-ed75bae6e603
 ```
+![Agent Tab](images/agent.png]
 
 完成後，我們再回到Configuration Tab，將剛剛的設定Rollout到Agent中，即可完成安裝。
-
 #### 成果
 * Cloud Monitoring JMX Dashboard
 ![Google Managed Prometheus提供的JMX Dashboard](images/jmx.png)

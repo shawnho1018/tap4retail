@@ -42,3 +42,4 @@ test-gradle
 build/
 
 out.json
+spring-cloud-gcp/

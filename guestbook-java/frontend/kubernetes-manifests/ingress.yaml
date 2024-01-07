@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    networking.gke.io/v1beta1.FrontendConfig: my-frontend-config
+  name: frontend
+  namespace: default
+spec:
+  rules:
+  - host: frontend.shawnk8s.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: java-guestbook-frontend
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - frontend.shawnk8s.com
+    secretName: tls-secret
+---
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: my-frontend-config
+  namespace: default
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: MOVED_PERMANENTLY_DEFAULT

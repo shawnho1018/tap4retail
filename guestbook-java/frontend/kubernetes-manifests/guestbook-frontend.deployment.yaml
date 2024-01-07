@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-guestbook-frontend
+  labels:
+    app: java-guestbook
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-guestbook
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: java-guestbook
+        tier: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: asia-east1-docker.pkg.dev/shawnho-demo-2023/shawnho-demo-2023/java-guestbook-frontend
+        ports:
+        - name: http-server
+          containerPort: 8080
+        - name: metrics
+          containerPort: 1234
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        env:
+        - name: PORT
+          value: "8080"
+        - name: GUESTBOOK_API_ADDR
+          value: java-guestbook-backend:8080
+        # This environment variable enables debugging support for the container.
+        # Remove this to disable the debug build.
+        - name: JAVA_TOOL_OPTIONS
+          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+        - name: OTEL_TRACES_EXPORTER
+          value: otlp
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://ubuntu0.default.svc:4317
+        - name: OTEL_TRACES_SAMPLER
+          value: parentbased_traceidratio
+        - name: OTEL_TRACES_SAMPLER_ARG
+          value: "1.0"

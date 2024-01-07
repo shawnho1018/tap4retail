@@ -1,0 +1,12 @@
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: frontend-monitoring
+  namespace: default
+spec:
+  endpoints:
+  - interval: 30s
+    port: metrics
+  selector:
+    matchLabels:
+      app: java-guestbook

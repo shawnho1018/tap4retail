@@ -99,10 +99,10 @@ sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/d
 
 #### 成果
 * Cloud Monitoring JMX Dashboard
-
+![Google Managed Prometheus提供的JMX Dashboard](images/jmx.png)
 
 * Cloud Trace Tracker
-
+![Cloud Trace Tracker](images/trace.png)]
 ---
 ## What's in this sample
 ### Kubernetes architecture

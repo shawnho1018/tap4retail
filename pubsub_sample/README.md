@@ -78,7 +78,7 @@ spec:
 
 ## Infrastructure by Terraform
 這部分我們說明此次TAP所建置的測試環境，如下圖：
-
+![architecture diagram](images/architecture.png)
 主要包含了以下各個部分：
 1. Runtime：
     * VPC網路, 包含對外的Cloud Router + SNAT Gateway

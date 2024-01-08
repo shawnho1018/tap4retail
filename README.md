@@ -1,5 +1,5 @@
 # TAP4Retail
-目前這個專案下方包含2個子專案：
+目前這個專案下方包含多個子專案：
 
 ## guestbook-java
 主要作為API Server實踐的Java Sample Code，基於Maven。裡面包含了監控JVM與產生Trace的相關機制。

@@ -1,0 +1,53 @@
+# apiVersion: serving.knative.dev/v1
+# kind: Service
+# metadata:
+#   name: webshell
+# spec:
+#   template:
+#     metadata:
+#       annotations:
+#         autoscaling.knative.dev/minScale: '1'
+#         run.googleapis.com/execution-environment: gen2
+#         autoscaling.knative.dev/maxScale: '1'
+#         run.googleapis.com/startup-cpu-boost: 'true'
+#     spec:
+#       containers:
+#       - name: webshell
+#         image: ghostplant/webshell
+#         ports:
+#         - name: http1
+#           containerPort: 8080
+#         env:
+#         - name: LISTEN
+#           value: '8080'
+# ---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: webshell
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: '1'
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/maxScale: '1'
+        run.googleapis.com/vpc-access-connector: projects/shawnho-demo-2023/locations/asia-east1/connectors/asia-east1-serverless
+        run.googleapis.com/startup-cpu-boost: 'true'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+      - name: webshell
+        image: ghostplant/webshell
+        ports:
+        - name: http1
+          containerPort: 8080
+        env:
+        - name: LISTEN
+          value: '8080'
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi

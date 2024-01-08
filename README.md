@@ -15,3 +15,8 @@ Please run below command to pull this submodule
 ```
 git submodule update --init --recursive
 ```
+
+## spring-cloud-gcp
+
+- The source code comes from https://github.com/GoogleCloudPlatform/spring-cloud-gcp
+- https://github.com/GoogleCloudPlatform/spring-cloud-gcp/tree/main/spring-cloud-gcp-samples/spring-cloud-gcp-pubsub-sample 

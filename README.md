@@ -6,3 +6,12 @@
 
 ## pubsub_sample
 主要包含了此次Infrastucture的建置機制，Builder基於Gradle，以及基於PubSub數量而進行AutoScaling的機制。
+
+## promo-evaluator
+
+A sample prototype for implementing event-driven architecture with Spring Boot, Graalvm, Google Pub/Sub and MongoDb. 
+
+Please run below command to pull this submodule
+```
+git submodule update --init --recursive
+```

@@ -20,3 +20,7 @@ git submodule update --init --recursive
 
 - The source code comes from https://github.com/GoogleCloudPlatform/spring-cloud-gcp
 - https://github.com/GoogleCloudPlatform/spring-cloud-gcp/tree/main/spring-cloud-gcp-samples/spring-cloud-gcp-pubsub-sample 
+
+## stress-tests
+### Locust
+這個專案介紹了Locust的分散式測試框架

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="9.3">
+<file name="/Users/owenwu/workspace/tap4retail/spring-cloud-gcp/spring-cloud-gcp-samples/spring-cloud-gcp-pubsub-sample/src/main/java/com/example/WebController.java">
+</file>
+<file name="/Users/owenwu/workspace/tap4retail/spring-cloud-gcp/spring-cloud-gcp-samples/spring-cloud-gcp-pubsub-sample/src/main/java/com/example/PubSubApplication.java">
+</file>
+<file name="/Users/owenwu/workspace/tap4retail/spring-cloud-gcp/spring-cloud-gcp-samples/spring-cloud-gcp-pubsub-sample/src/main/resources/application.properties">
+</file>
+</checkstyle>

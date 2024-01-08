@@ -50,6 +50,7 @@ module "project-services" {
     "pubsub.googleapis.com",
     "redis.googleapis.com",
     "serviceconsumermanagement.googleapis.com",
-    "networkconnectivity.googleapis.com"
+    "networkconnectivity.googleapis.com",
+    "vpcaccess.googleapis.com"
   ]
 }

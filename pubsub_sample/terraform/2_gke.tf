@@ -42,7 +42,7 @@ module "gke" {
       machine_type              = "e2-standard-8"
       node_locations            = join("," ,var.gcp_zones)
       min_count                 = 1
-      max_count                 = 4
+      max_count                 = 1
       local_ssd_count           = 0
       disk_size_gb              = 100
       disk_type                 = "pd-standard"
@@ -61,3 +61,4 @@ module "gke" {
     ]
   }
 }
+

@@ -38,4 +38,13 @@ resource "google_workstations_workstation_config" "default" {
       disable_public_ip_addresses = true
     }
   }
+  persistent_directories {
+    mount_path = "/home"
+    gce_pd {
+      size_gb        = 200
+      fs_type        = "ext4"
+      disk_type      = "pd-standard"
+      reclaim_policy = "DELETE"
+    }
+  }
 }

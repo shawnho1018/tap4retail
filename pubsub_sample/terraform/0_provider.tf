@@ -51,8 +51,8 @@ module "project-services" {
     "redis.googleapis.com",
     "serviceconsumermanagement.googleapis.com",
     "networkconnectivity.googleapis.com",
-    "container.googleapis.com",
     "vpcaccess.googleapis.com",
+    "container.googleapis.com",
     "cloudaicompanion.googleapis.com"
   ]
 }

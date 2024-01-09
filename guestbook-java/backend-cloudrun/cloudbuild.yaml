@@ -1,5 +1,13 @@
 steps:
-  - name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
-    args: ['skaffold', 'build', '-f', 'skaffold.yaml', '--file-output', '/workspace/out.json']
-  - name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
-    args: ['skaffold', 'deploy', '--build-artifacts', '/workspace/out.json']
+- name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
+  args: ['skaffold', 'build', '--file-output', '/workspace/out.json']
+- name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
+  args: ['skaffold', 'deploy', '--build-artifacts', '/workspace/out.json']
+# - name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
+#   args: ['skaffold', 'run', '-f', 'skaffold.yaml']
+# substitutions:
+#   _GCR_HOSTNAME: asia-east1-docker.pkg.dev
+#   _GCR_PROJECT: shawnho-demo-2023
+#   _IMAGE_NAME: java-guestbook-restful
+# images: 
+# - "${_GCR_HOSTNAME}/${_GCR_PROJECT}/shawnho-demo-2023/${_IMAGE_NAME}"

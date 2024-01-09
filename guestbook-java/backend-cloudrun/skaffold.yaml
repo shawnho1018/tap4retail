@@ -8,14 +8,15 @@ build:
   # defines where to find the code at build time and where to push the resulting image
   artifacts:
     - image: asia-east1-docker.pkg.dev/shawnho-demo-2023/shawnho-demo-2023/java-guestbook-restful
-      # To learn more about how Jib builds Java containers visit
-      # https://github.com/GoogleContainerTools/jib
       jib:
-        project: backend
-      context: ../
+        type: maven
+        args: 
+        - --no-transfer-progress
+        - -DskipTests
+        fromImage: eclipse-temurin:17-jre
 manifests:
   rawYaml:
-    - cloudrun-manifests/*
+  - cloudrun-manifests/*
 deploy:
   cloudrun:
     projectid: shawnho-demo-2023

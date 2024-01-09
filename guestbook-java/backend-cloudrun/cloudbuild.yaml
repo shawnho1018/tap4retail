@@ -1,0 +1,4 @@
+- name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
+  args: ['skaffold', 'build', '-f', 'skaffold.yaml', '--file-output', '/workspace/out.json']
+- name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
+  args: ['skaffold', 'deploy', '--build-artifacts', '/workspace/out.json']'

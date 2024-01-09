@@ -62,3 +62,21 @@ module "gke" {
   }
 }
 
+resource "kubernetes_namespace" "mongodb" {
+  metadata {
+    labels = {
+      "service" = "mongodb"
+    }
+    name = "mongodb"
+  }
+}
+module "mongodb" {
+  source = "terraform-google-modules/gcloud/google//modules/kubectl-wrapper"
+
+  project_id              = var.project_id
+  cluster_name            = module.gke.name
+  cluster_location        = module.gke.location
+  module_depends_on       = [module.gke]
+  kubectl_create_command  = "kubectl apply -f mongodb/ -n ${kubernetes_namespace.mongodb.id}"
+  kubectl_destroy_command = "echo done"
+}

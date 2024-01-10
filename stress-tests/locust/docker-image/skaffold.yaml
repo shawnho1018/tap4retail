@@ -1,0 +1,14 @@
+apiVersion: skaffold/v4beta8
+kind: Config
+metadata:
+  name: docker-image
+build:
+  artifacts:
+    - image: asia-east1-docker.pkg.dev/shawnho-demo-2023/shawnho-demo-2023/locust-tasks
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - k8s-manifests/master-controller.yaml
+    - k8s-manifests/master-service.yaml
+    - k8s-manifests/worker-controller.yaml

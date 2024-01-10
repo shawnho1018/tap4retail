@@ -1,11 +1,11 @@
 #!/bin/bash
 export LOCUST_IMAGE_NAME=locust-tasks
 export LOCUST_IMAGE_TAG=latest
-export GKE_CLUSTER=gke-lt-cluster
+export GKE_CLUSTER=lab-cluster
 export PROJECT=shawnho-demo-2023
-export AR_REPO=my-repo
+export AR_REPO=shawnho-demo-2023
 export REGION=asia-east1
-export SAMPLE_APP_TARGET="http://python-guestbook-frontend.default.svc"
+export SAMPLE_APP_TARGET="https://backend-fr4elfpuza-de.a.run.app"
 
 
 mkdir -p k8s-manifests/

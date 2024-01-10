@@ -16,7 +16,7 @@ spec:
       containerConcurrency: 80
       timeoutSeconds: 300
       containers:
-      - image: asia-east1-docker.pkg.dev/shawnho-demo-2023/shawnho-demo-2023/java-guestbook-restful
+      - image: myimage
         ports:
         - name: http1
           containerPort: 8080

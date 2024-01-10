@@ -1,0 +1,191 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: k6-test:prom-receiver
+rules:
+- apiGroups: [""]
+  resources:
+  - pods
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k6-test:prom-receiver
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: k6-test:prom-receiver
+subjects:
+- kind: ServiceAccount
+  namespace: k6-test
+  name: default
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: k6-test
+  name: prom-receiver
+  labels:
+    prometheus: test
+spec:
+  selector:
+    app: prometheus
+    prometheus: test
+  ports:
+  - name: web
+    port: 9090
+    targetPort: web
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: k6-test
+  name: prom-receiver
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  labels:
+    prometheus: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      prometheus: test
+  serviceName: prom-receiver
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        prometheus: test
+    spec:
+      automountServiceAccountToken: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - arm64
+                - amd64
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+      initContainers:
+      - name: config-init
+        image: gke.gcr.io/gke-distroless/bash:20220419
+        command: ['/bin/bash', '-c', 'touch /prometheus/config_out/config.yaml']
+        volumeMounts:
+        - name: config-out
+          mountPath: /prometheus/config_out
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - all
+          privileged: false
+      containers:
+      - name: prometheus
+        image: gke.gcr.io/prometheus-engine/prometheus:v2.41.0-gmp.4-gke.1
+        args:
+        - --config.file=/prometheus/config_out/config.yaml
+        - --storage.tsdb.path=/prometheus/data
+        - --storage.tsdb.retention.time=24h
+        - --web.enable-lifecycle
+        - --web.enable-remote-write-receiver
+        - --storage.tsdb.no-lockfile
+        - --web.route-prefix=/
+        ports:
+        - name: web
+          containerPort: 9090
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: web
+            scheme: HTTP
+        resources:
+          requests:
+            memory: 400Mi
+        volumeMounts:
+        - name: config-out
+          mountPath: /prometheus/config_out
+          readOnly: true
+        - name: prometheus-db
+          mountPath: /prometheus/data
+      - name: config-reloader
+        image: gke.gcr.io/prometheus-engine/config-reloader:v0.7.4-gke.0
+        args:
+        - --config-file=/prometheus/config/config.yaml
+        - --config-file-output=/prometheus/config_out/config.yaml
+        - --reload-url=http://localhost:9090/-/reload
+        - --ready-url=http://localhost:9090/-/ready
+        - --listen-address=:19091
+        ports:
+        - name: reloader-web
+          containerPort: 8080
+        resources:
+          limits:
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+        volumeMounts:
+        - name: config
+          mountPath: /prometheus/config
+        - name: config-out
+          mountPath: /prometheus/config_out
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - name: prometheus-db
+        emptyDir: {}
+      - name: config
+        configMap:
+          name: prom-receiver
+          defaultMode: 420
+      - name: config-out
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: k6-test
+  name: prom-receiver
+  labels:
+    prometheus: test
+data:
+  config.yaml: |
+    global:
+      scrape_interval: 30s
+
+    scrape_configs:
+    # Let Prometheus scrape itself.
+    - job_name: prometheus
+      static_configs:
+      - targets: ['localhost:9090']
+
+    # Scrape pods with label app=prom-example across all namespaces
+    # on the port named 'metrics'.
+    - job_name: prom-example
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        regex: prom-example
+        action: keep
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name, __meta_kubernetes_pod_container_port_name]
+        regex: (.+);(.+)
+        target_label: instance
+        replacement: $1:$2
+        action: replace
+      - source_labels: [__meta_kubernetes_pod_container_port_name]
+        regex: metrics
+        action: keep

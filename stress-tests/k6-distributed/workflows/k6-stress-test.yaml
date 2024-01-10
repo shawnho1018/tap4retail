@@ -1,0 +1,86 @@
+main:
+  params: [input]
+  steps:
+  - setup:
+      assign:
+      - clusterName: demo
+      - clusterLocation: asia-east1
+      - execNamespace: k6-test
+      - testScriptBucket: dennyooo-k6-test-scripts
+  - initVars:
+      assign:
+      - testid: '${default(map.get(input, "testid"), "k6-test-" + int(sys.now() * 1000))}'
+      - vus: '${default(map.get(input, "vus"), 100)}'
+      - perInstance: '${default(map.get(input, "perInstance"), 100)}'
+      - parallelism: '${vus // perInstance + if(vus % perInstance > 0, 1, 0)}'
+      - duration: '${default(map.get(input, "duration"), "5m")}'
+      - script: '${input.script}'
+  - createTestRun:
+      call: gke.request
+      args:
+        cluster_id: '${clusterName}'
+        location: '${clusterLocation}'
+        method: POST
+        path: '${"/apis/k6.io/v1alpha1/namespaces/" + execNamespace + "/testruns"}'
+        body:
+          apiVersion: k6.io/v1alpha1
+          kind: TestRun
+          metadata:
+            name: '${testid}'
+          spec:
+            parallelism: '${parallelism}'
+            script:
+              localFile: '${"/test/" + script}'
+            arguments: '${"-o experimental-prometheus-rw --vus " + vus + " --duration " + duration + " --tag testid=" + testid}'
+            runner:
+              metadata:
+                annotations:
+                  gke-gcsfuse/volumes: "true"
+              env:
+              - name: K6_PROMETHEUS_RW_SERVER_URL
+                value: http://prom-receiver:9090/api/v1/write
+              - name: K6_PROMETHEUS_RW_TREND_STATS
+                value: p(95),p(99),min,max
+              resources:
+                requests:
+                  cpu: "1"
+                  memory: 1Gi
+              volumes:
+              - name: k6-test-scripts
+                csi:
+                  driver: gcsfuse.csi.storage.gke.io
+                  readOnly: true
+                  volumeAttributes:
+                    bucketName: '${testScriptBucket}'
+                    mountOptions: "implicit-dirs"
+              volumeMounts:
+              - name: k6-test-scripts
+                mountPath: /test
+      result: createTestRunResult
+  - waitForTestRunFinish:
+      call: sys.sleep
+      args:
+        seconds: 2
+      next: getTestRunStatus
+  - getTestRunStatus:
+      call: gke.request
+      args:
+        cluster_id: '${clusterName}'
+        location: '${clusterLocation}'
+        method: GET
+        path: '${"/apis/k6.io/v1alpha1/namespaces/" + execNamespace + "/testruns/" + testid}'
+      result: testRunResponse
+  - checkTestRunStage:
+      switch:
+      - condition: '${testRunResponse.body.status.stage == "finished"}'
+        next: testRunCleanup
+      next: waitForTestRunFinish
+  - testRunCleanup:
+      call: gke.request
+      args:
+        cluster_id: '${clusterName}'
+        location: '${clusterLocation}'
+        method: DELETE
+        path: '${"/apis/k6.io/v1alpha1/namespaces/" + execNamespace + "/testruns/" + testid}'
+  - completed:
+      return: '${"Test " + testid + " finished"}'

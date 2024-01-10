@@ -10,8 +10,7 @@ steps:
   - '-c'
   - |
     timestamp="$(date +"%s")"
-    wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -O /usr/bin/jq
-    chmod +x /usr/bin/jq
+    apt-get update && apt-get install -y jq
     image=$(cat /workspace/out.json | jq -r '.builds[0].tag')
     echo "image: ${image} + timestamp: ${timestamp}}"
     gcloud deploy releases create "test-release-${timestamp}" \

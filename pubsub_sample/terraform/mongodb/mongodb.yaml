@@ -26,10 +26,23 @@ spec:
       - name: mongo
         image: mongo:4
         ports:
-          - containerPort: 27017
+          - name: mongo
+            containerPort: 27017
         volumeMounts:
         - name: "mongo-data-dir"
           mountPath: "/data/db"
+      - name: exporter
+        image: percona/mongodb_exporter:0.40.0
+        args:
+          [
+            "--web.listen-address=:9216",
+            "--mongodb.uri",
+            "mongodb://localhost:27017",
+            "--collect-all"
+          ]
+        ports:
+          - name: metrics
+            containerPort: 9216
       volumes:
       - name: "mongo-data-dir"
         persistentVolumeClaim:

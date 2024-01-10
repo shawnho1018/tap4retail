@@ -10,8 +10,12 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - port: 27017
+    - name: mongodb
+      port: 27017
       targetPort: 27017
+    - name: metrics
+      port: 9216
+      targetPort: 9216
   selector:
     app: java-guestbook
     tier: db

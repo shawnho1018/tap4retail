@@ -69,6 +69,7 @@ Grant the service account from above permission to read the objects from the buc
 ### Create a Workflow to execute tests
 
 Create a new Workflow to execute tests. The code is in `workflows/k6-stress-test.yaml`.
+When creating the Workflow, make sure to select the service account you created above.
 Please change the variables to match your environment at the first step of the workflow:
 
 ```yaml

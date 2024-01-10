@@ -1,12 +1,30 @@
 steps:
 - name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
+  id: 'skaffold build'
   args: ['skaffold', 'build', '--file-output', '/workspace/out.json']
-- name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
-  args: ['skaffold', 'deploy', '--build-artifacts', '/workspace/out.json']
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'trigger cloud deploy'
+  entrypoint: bash
+  args:
+  - '-c'
+  - |
+    timestamp="$(date +"%s")"
+    wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -O /usr/bin/jq
+    chmod +x /usr/bin/jq
+    image=$(cat /workspace/out.json | jq -r '.builds[0].tag')
+    echo "image: ${image} + timestamp: ${timestamp}}"
+    gcloud deploy releases create "test-release-${timestamp}" \
+    --delivery-pipeline="${_DELIVERY_PIPELINE}" \
+    --region=${_GCP_REGION} \
+    --images=myimage=${image}
+
 # - name: 'gcr.io/k8s-skaffold/skaffold:v2.9.0'
-#   args: ['skaffold', 'run', '-f', 'skaffold.yaml']
-# substitutions:
-#   _GCR_HOSTNAME: asia-east1-docker.pkg.dev
+#   args: ['skaffold', 'deploy', '--build-artifacts', '/workspace/out.json']
+
+substitutions:
+  _DELIVERY_PIPELINE: demo-pipeline
+  _GCP_REGION: "asia-east1"
 #   _GCR_PROJECT: shawnho-demo-2023
 #   _IMAGE_NAME: java-guestbook-restful
 # images: 
